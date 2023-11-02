@@ -1,7 +1,6 @@
 "use client";
+import { Theme } from "@/types";
 import React from "react";
-
-type Theme = "light" | "dark";
 
 type ThemeContextType = {
   theme: Theme;
@@ -13,15 +12,20 @@ const ThemeContext = React.createContext<ThemeContextType | undefined>(
 );
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = React.useState<Theme>("light");
+  const [theme, setTheme] = React.useState<Theme>("system");
 
   React.useEffect(() => {
-    if (theme === "light") {
+    const localTheme = localStorage.getItem("theme") || "system";
+    if (
+      localTheme === "dark" ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches &&
+        localTheme === "system")
+    ) {
       setTheme("dark");
       document.documentElement.classList.add("dark");
     } else {
       setTheme("light");
-      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
     }
   }, [theme]);
 
