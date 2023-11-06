@@ -53,7 +53,6 @@ export async function deleteUser(params: DeleteUserParams) {
     try {
         await connectToDatabase()
 
-        // delete user signed up with google, github etc.
         const user = await User.findOneAndDelete({ clerkId: params.clerkId })
         if (!user) {
             throw new Error("user not found")
