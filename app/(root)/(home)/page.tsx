@@ -6,68 +6,11 @@ import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
 import Link from "next/link";
+import { getQuestions } from "@/lib/actions/question.action";
 
-const questions = [
-  {
-    _id: 1,
-    title: "How to create a responsive website?",
-    tags: [
-      { _id: 101, name: "HTML" },
-      { _id: 102, name: "CSS" },
-    ],
-    author: {
-      _id: 201,
-      name: "John Doe",
-      picture: "john-doe.jpg",
-    },
-    views: 500,
-    answers: [
-      { answerId: 1, content: "Use media queries in CSS for responsiveness." },
-      { answerId: 2, content: "Consider using a responsive CSS framework." },
-    ],
-    createdAt: "2023-10-04T14:32:45.678Z",
-    upvotes: 15,
-  },
-  {
-    _id: 2,
-    title: "What is JavaScript closure?",
-    tags: [{ _id: 103, name: "JavaScript" }],
-    author: {
-      _id: 202,
-      name: "Alice Smith",
-      picture: "alice-smith.jpg",
-    },
-    views: 7500,
-    answers: [
-      {
-        answerId: 3,
-        content:
-          "A closure is a function with access to its own scope and the outer (enclosing) function's scope.",
-      },
-    ],
-    createdAt: "2023-11-01T15:07:07.344Z",
-    upvotes: 20,
-  },
-  {
-    _id: 3,
-    title: "Best practices for database design?",
-    tags: [
-      { _id: 104, name: "Database" },
-      { _id: 105, name: "SQL" },
-    ],
-    author: {
-      _id: 203,
-      name: "Eleanor Brown",
-      picture: "eleanor-brown.jpg",
-    },
-    views: 600,
-    answers: [],
-    createdAt: "2023-10-07T19:05:10.987Z",
-    upvotes: 10,
-  },
-];
+export default async function Home() {
+  const questions = await getQuestions({});
 
-export default function Home() {
   return (
     <>
       <div className="h1-bold text-dark100_light900 flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">

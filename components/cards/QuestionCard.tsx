@@ -3,28 +3,9 @@ import React from "react";
 import RenderTag from "../shared/RenderTag";
 import Metric from "../shared/Metric";
 import { getFormatNumber, getPluralString, getTimestamp } from "@/lib/utils";
+import { PopulatedQuestionType } from "@/database/shared.types";
 
-type TagType = {
-  _id: number;
-  name: string;
-};
-
-type AuthorType = {
-  _id: number;
-  name: string;
-  picture: string;
-};
-
-type QuestionCardProps = {
-  _id: number;
-  title: string;
-  tags: TagType[];
-  author: AuthorType;
-  views: number;
-  answers: Array<object>;
-  createdAt: string;
-  upvotes: number;
-};
+type QuestionCardProps = PopulatedQuestionType;
 
 const QuestionCard: React.FC<QuestionCardProps> = (props) => {
   return (
@@ -32,7 +13,7 @@ const QuestionCard: React.FC<QuestionCardProps> = (props) => {
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
         <div>
           <span className="subtle-regular text-dark400_light700 line-clamp-1 sm:hidden">
-            {props.createdAt}
+            {"test"}
           </span>
           <Link href={`/question/${props._id}`}>
             <h3 className="base-semibold sm:h3-bold text-dark200_light900 line-clamp-1">
@@ -42,7 +23,7 @@ const QuestionCard: React.FC<QuestionCardProps> = (props) => {
         </div>
       </div>
       <div className="mt-3.5 flex flex-wrap gap-2">
-        {props.tags.map((item) => (
+        {props.tags?.map((item) => (
           <RenderTag
             key={item._id}
             _id={item._id}
@@ -55,31 +36,31 @@ const QuestionCard: React.FC<QuestionCardProps> = (props) => {
         <Metric
           imgUrl="/assets/icons/avatar.svg"
           alt="avatar"
-          value={props.author.name}
+          value={props.author?.name}
           title={`- ${getTimestamp(props.createdAt)}`}
-          href={`/profile/${props.author._id}`}
+          href={`/profile/${props.author?._id}`}
           className="body-medium text-dark400_light700"
           isAuthor={true}
         />
         <Metric
           imgUrl="/assets/icons/like.svg"
           alt="upvotes"
-          value={getFormatNumber(props.upvotes)}
-          title={getPluralString(props.upvotes, "Upvote")}
+          value={getFormatNumber(props.upvotes.length)}
+          title={getPluralString(props.upvotes.length, "upvote")}
           className="small-medium text-dark400_light800"
         />
         <Metric
           imgUrl="/assets/icons/message.svg"
           alt="messages"
           value={getFormatNumber(props.answers.length)}
-          title={getPluralString(props.answers.length, "Answer")}
+          title={getPluralString(props.answers.length, "answer")}
           className="small-medium text-dark400_light800"
         />
         <Metric
           imgUrl="/assets/icons/eye.svg"
           alt="eye"
           value={getFormatNumber(props.views)}
-          title={getPluralString(props.views, "View")}
+          title={getPluralString(props.views, "view")}
           className="small-medium text-dark400_light800"
         />
       </div>

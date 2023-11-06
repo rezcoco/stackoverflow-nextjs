@@ -9,7 +9,7 @@ export function getPluralString(num: number, str: string) {
   return num > 1 ? `${str}s` : str
 }
 
-export function getTimestamp(createdAt: string) {
+export function getTimestamp(createdAt: string | Date) {
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
@@ -29,16 +29,17 @@ export function getTimestamp(createdAt: string) {
   if (timeDifferent < minute) {
     return "less a minute"
   } else if (timeDifferent < hour) {
-    const minutes = createdDate.getMinutes()
+    const minutes = Math.round(timeDifferent / minute)
     return `${minutes} ${getPluralString(minutes, "minute")} ago`
   } else if (timeDifferent > hour && timeDifferent < day) {
-    const hours = createdDate.getHours()
+    const hours = Math.round(timeDifferent / hour)
     return `${hours} ${getPluralString(hours, "hour")} ago`
   } else if (timeDifferent > day && timeDifferent < week) {
-    return `${createdDay} ${getPluralString(createdDay, "day")} ago`
+    const days = Math.round(timeDifferent / day)
+    return `${days} ${getPluralString(days, "day")} ago`
   } else if (timeDifferent > week && timeDifferent < month) {
-    const currentWeek = Math.ceil(createdDay / 7)
-    return `${currentWeek} ${getPluralString(currentWeek, "week")} ago`
+    const weeks = Math.round(timeDifferent / week)
+    return `${weeks} ${getPluralString(weeks, "week")} ago`
   } else if (timeDifferent > month && timeDifferent < year) {
     return `${months[createdMonth]} ${createdDay}`
   } else {
