@@ -45,8 +45,6 @@ const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
   async function onSubmit(values: FormSchemaType) {
     setIsSubmiting(true);
 
-    console.log(pathname);
-
     try {
       await createQuestion({
         title: values.title,
