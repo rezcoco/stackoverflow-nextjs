@@ -4,6 +4,10 @@ let isConnected = false
 export async function connectToDatabase() {
     mongoose.set("strictQuery", true)
 
+    if (!process.env.WEBHOOK_SECRET) {
+        return console.log("Webhook secret key not provided")
+    }
+
     if (isConnected) {
         return console.log("Mongodb already connected")
     }
