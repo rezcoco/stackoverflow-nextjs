@@ -5,3 +5,9 @@ export const QuestionSchemaValidation = z.object({
     explanation: z.string().min(20),
     tags: z.array(z.string().min(1).max(15)).min(1).max(3)
 });
+
+export const AnswerSchemaValidation = z.object({
+    answer: z.string().min(100)
+})
+
+export type AnswerSchemaType = z.infer<typeof AnswerSchemaValidation>

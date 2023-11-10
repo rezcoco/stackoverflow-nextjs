@@ -13,7 +13,7 @@ const QuestionCard: React.FC<QuestionCardProps> = (props) => {
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
         <div>
           <span className="subtle-regular text-dark400_light700 line-clamp-1 sm:hidden">
-            {"test"}
+            {getTimestamp(props.createdAt)}
           </span>
           <Link href={`/question/${props._id}`}>
             <h3 className="base-semibold sm:h3-bold text-dark200_light900 line-clamp-1">
@@ -34,11 +34,11 @@ const QuestionCard: React.FC<QuestionCardProps> = (props) => {
       </div>
       <div className="flex-between mt-6 w-full flex-wrap gap-6">
         <Metric
-          imgUrl="/assets/icons/avatar.svg"
+          imgUrl={props.author.picture}
           alt="avatar"
           value={props.author?.name}
           title={`- ${getTimestamp(props.createdAt)}`}
-          href={`/profile/${props.author?._id}`}
+          href={`/profile/${props.author?.clerkId}`}
           className="body-medium text-dark400_light700"
           isAuthor={true}
         />

@@ -42,3 +42,12 @@ export type PopulatedQuestionType = Pick<QuestionType, "title" | "content" | "vi
     answers: Array<object>
     author: UserType
 }
+
+export type AnswerType = mongoose.Document & {
+    author: mongoose.Types.ObjectId
+    question: mongoose.Types.ObjectId
+    content: string
+    upvotes: mongoose.Types.ObjectId[]
+    downvotes: mongoose.Types.ObjectId[]
+    createdAt: Date
+}

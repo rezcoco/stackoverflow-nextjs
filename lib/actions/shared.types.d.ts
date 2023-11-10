@@ -143,6 +143,7 @@ export interface UpdateUserParams {
 export interface ToggleSaveQuestionParams {
     userId: string;
     questionId: string;
+    hasSaved: boolean
     path: string;
 }
 

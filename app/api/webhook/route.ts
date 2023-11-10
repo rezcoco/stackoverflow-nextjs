@@ -61,7 +61,7 @@ export async function POST(req: Request) {
             email: email_addresses[0].email_address,
             name: `${first_name} ${last_name ? ` ${last_name}` : ""}`,
             picture: image_url,
-            username: username || id
+            username: username!
         })
 
         return NextResponse.json({ message: "ok", user: mongoUser })

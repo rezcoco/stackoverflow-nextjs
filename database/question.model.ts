@@ -7,9 +7,9 @@ const questionSchema = new mongoose.Schema<QuestionType>(
         content: { required: true, type: String },
         tags: [{ required: true, type: mongoose.Schema.Types.ObjectId, ref: "Tags" }],
         views: { type: Number, default: 0 },
-        upvotes: [{ type: mongoose.Schema.Types.ObjectId, default: 0, ref: "User" }],
-        downvotes: [{ type: mongoose.Schema.Types.ObjectId, default: 0, ref: "User" }],
-        answers: [{ type: mongoose.Schema.Types.ObjectId, default: 0, ref: "Answer" }],
+        upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        answers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Answer" }],
         author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     },
     {
