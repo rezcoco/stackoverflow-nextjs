@@ -21,7 +21,7 @@ const Metric: React.FC<MetricProps> = (props) => {
         alt={props.alt}
         height={16}
         width={16}
-        className={cn("object-contain invert-colors", {
+        className={cn("object-contain", {
           "rounded-full": props.href,
         })}
       />

@@ -1,24 +1,26 @@
 import Link from "next/link";
 import React from "react";
 import { Badge } from "../ui/badge";
+import { TTagDoc } from "@/database/tag.model";
 
 type RenderTagProps = {
-  _id: number;
-  name: string;
+  tag: Partial<TTagDoc>;
   showCount?: boolean;
   totalQuestions?: number;
 };
 
-const RenderTag: React.FC<RenderTagProps> = (props) => {
+const RenderTag: React.FC<RenderTagProps> = ({
+  tag,
+  showCount,
+  totalQuestions,
+}) => {
   return (
-    <Link className="flex justify-between gap-2" href={`/tags/${props._id}`}>
+    <Link className="flex justify-between gap-2" href={`/tags/${tag?._id}`}>
       <Badge className="subtle-medium background-light800_dark300 text-light400_light500 rounded-md border-none px-4 py-2 uppercase">
-        {props.name}
+        {tag?.name}
       </Badge>
-      {props.showCount && (
-        <p className="small-medium text-dark500_light700">
-          {props.totalQuestions}
-        </p>
+      {showCount && (
+        <p className="small-medium text-dark500_light700">{totalQuestions}</p>
       )}
     </Link>
   );

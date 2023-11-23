@@ -20,41 +20,76 @@ import {
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { createQuestion } from "@/lib/actions/question.action";
+import { createQuestion, editQuestion } from "@/lib/actions/question.action";
 import { useTheme } from "@/context/ThemeProvider";
 import { useRouter, usePathname } from "next/navigation";
+import { Populated } from "@/database/shared.types";
+import { TQuestionDoc } from "@/database/question.model";
 
 type FormSchemaType = z.infer<typeof QuestionSchemaValidation>;
-const TYPE: "edit" | "post" = "post";
 
-const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
+type PropsWithQuestion = {
+  type: "edit";
+  question: Populated<TQuestionDoc, "author" | "tags">;
+};
+type PropsWithoutQuestion = {
+  type: "post";
+};
+
+type Props = {
+  mongoUserId: string;
+} & (PropsWithQuestion | PropsWithoutQuestion);
+
+const Question: React.FC<Props> = (props) => {
   const [isSubmiting, setIsSubmiting] = React.useState(false);
   const editorRef = React.useRef<null | any>(null);
   const router = useRouter();
   const pathname = usePathname();
   const { theme } = useTheme();
+
+  let question: Populated<TQuestionDoc, "author" | "tags"> | undefined;
+
+  if ("question" in props) {
+    question = props.question;
+  }
+
+  const groupTags = question && question.tags.map((tag: any) => tag.name);
+
+  const defaultValues: FormSchemaType = {
+    title: question ? question.title : "",
+    explanation: question ? question.content : "",
+    tags: groupTags || [],
+  };
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(QuestionSchemaValidation),
-    defaultValues: {
-      title: "",
-      explanation: "",
-      tags: [],
-    },
+    defaultValues,
   });
 
   async function onSubmit(values: FormSchemaType) {
     setIsSubmiting(true);
 
     try {
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: JSON.parse(mongoUserId),
-        path: pathname,
-      });
+      if (props.type === "post") {
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author: props.mongoUserId,
+          path: pathname,
+        });
 
-      router.push("/");
+        router.push("/");
+      } else {
+        await editQuestion({
+          questionId: question?._id,
+          title: values.title,
+          content: values.explanation,
+          path: pathname,
+        });
+
+        router.push(`/question/${question?._id}`);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -143,7 +178,7 @@ const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
                   onInit={(evt, editor) => (editorRef.current = editor)}
                   onEditorChange={(e) => field.onChange(e)}
                   onBlur={field.onBlur}
-                  initialValue=""
+                  initialValue={defaultValues.explanation}
                   init={{
                     height: 350,
                     menubar: false,
@@ -194,8 +229,9 @@ const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
               <FormControl className="mt-3.5">
                 <>
                   <Input
+                    disabled={props.type === "edit"}
                     className="no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
-                    placeholder="e.g. reactjs, javascript, typescript"
+                    placeholder="e.g. reactjs, javascript, props.typescript"
                     onKeyDown={(e) => handleInputKeyDown(e, field)}
                   />
                   {field.value.length > 0 && (
@@ -207,15 +243,21 @@ const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
                         >
                           {tag}
                           <button
-                            onClick={(e) => handleTagRemove(e, tag, field)}
+                            onClick={
+                              props.type === "edit"
+                                ? (e) => handleTagRemove(e, tag, field)
+                                : () => {}
+                            }
                           >
-                            <Image
-                              src="/assets/icons/close.svg"
-                              width={12}
-                              height={12}
-                              alt="close"
-                              className="cursor-pointer object-contain invert-0 dark:invert"
-                            />
+                            {props.type !== "edit" && (
+                              <Image
+                                src="/assets/icons/close.svg"
+                                width={12}
+                                height={12}
+                                alt="close"
+                                className="cursor-pointer object-contain invert-0 dark:invert"
+                              />
+                            )}
                           </button>
                         </Badge>
                       ))}
@@ -237,10 +279,10 @@ const Question: React.FC<{ mongoUserId: string }> = ({ mongoUserId }) => {
           className={cn("primary-gradient w-fit !text-light-900")}
         >
           {isSubmiting
-            ? TYPE === "post"
+            ? props.type === "post"
               ? "Posting..."
               : "Editing..."
-            : TYPE === "post"
+            : props.type === "post"
             ? "Ask a Question"
             : "Edit Question"}
         </Button>

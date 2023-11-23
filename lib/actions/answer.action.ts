@@ -1,22 +1,36 @@
 "use server"
 
-import Answer from "@/database/answer.model";
+import Answer, { TAnswerDoc } from "@/database/answer.model";
 import { connectToDatabase } from "../mongoose";
-import { AnswerVoteParams, CreateAnswerParams, GetAnswersParams } from "./shared.types";
+import { AnswerVoteParams, CreateAnswerParams, DeleteAnswerParams, GetAnswersParams } from "./shared.types";
 import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
-import { UserType } from "@/database/shared.types";
-
+import Interaction from "@/database/interaction.model";
+import User, { TUserDoc } from "@/database/user.model";
+import { Populated } from "@/database/shared.types";
+import { FilterQuery } from "mongoose";
 
 export async function createAnswer(params: CreateAnswerParams) {
     try {
         await connectToDatabase()
 
         const answer = await Answer.create(params)
-        await Question.findByIdAndUpdate(
+        const question = await Question.findByIdAndUpdate(
             params.question,
             { $push: { answers: answer.id } },
         )
+
+        await Interaction.create({
+            user: params.author,
+            action: "answer",
+            answer: answer.id,
+            question: params.question,
+            tags: question?.tags
+        })
+
+        await User.findByIdAndUpdate(params.author, {
+            $inc: { reputation: 10 }
+        })
 
         revalidatePath(params.path)
 
@@ -28,18 +42,43 @@ export async function createAnswer(params: CreateAnswerParams) {
 }
 
 type PopulatedUser = {
-    author: Pick<UserType, "id" | "_id" | "clerkId" | "name" | "picture">
+    author: Populated<TUserDoc, "id" | "_id" | "clerkId" | "name" | "picture">
 }
 
 export async function getAnswers(params: GetAnswersParams) {
     try {
         await connectToDatabase()
 
-        const answers = await Answer.find({ question: params.questionId })
-            .populate<PopulatedUser>("author", "_id clerkId name picture")
-            .sort({ createdAt: -1 })
+        const { sortBy, page = 1, pageSize = 10, questionId } = params
 
-        return answers
+        const sortOptions: FilterQuery<TAnswerDoc> = {}
+        const skip = pageSize * (page - 1)
+        const fullDocs = await Answer.countDocuments({ question: questionId })
+
+        switch (sortBy) {
+            case "highestUpvotes":
+                sortOptions.upvotes = -1
+                break
+            case "lowestUpvotes":
+                sortOptions.upvotes = 1
+                break
+            case "recent":
+                sortOptions.createdAt = -1
+                break
+            case "old":
+                sortOptions.createdAt = 1
+        }
+
+        const answers = await Answer.find({ question: questionId })
+            .populate<PopulatedUser>("author", "_id clerkId name picture")
+            .skip(skip).limit(pageSize).sort(sortOptions);
+
+        const isNext = answers.length + skip < fullDocs
+
+        return {
+            answers,
+            isNext
+        }
     } catch (error) {
         console.log(error)
         throw error
@@ -68,6 +107,14 @@ export async function upvoteAnswer(params: AnswerVoteParams) {
 
         const result = await Answer.findByIdAndUpdate(answerId, updateQuery, { new: true })
         if (!result) throw new Error("answer not found")
+
+        await User.findByIdAndUpdate(userId, {
+            $inc: { reputation: hasupVoted ? -2 : 2 }
+        })
+
+        await User.findByIdAndUpdate(result.author._id, {
+            $inc: { reputation: hasupVoted ? -10 : 10 }
+        })
 
         revalidatePath(path)
     } catch (error) {
@@ -98,6 +145,34 @@ export async function downvoteAnswer(params: AnswerVoteParams) {
 
         const result = await Answer.findByIdAndUpdate(answerId, updateQuery, { new: true })
         if (!result) throw new Error("answer not found")
+
+        await User.findByIdAndUpdate(userId, {
+            $inc: { reputation: hasdownVoted ? 2 : -2 }
+        })
+
+        await User.findByIdAndUpdate(result.author._id, {
+            $inc: { reputation: hasdownVoted ? 10 : -10 }
+        })
+
+        revalidatePath(path)
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export async function deleteAnswer(params: DeleteAnswerParams) {
+    try {
+        await connectToDatabase()
+
+        const { answerId, path } = params
+
+        const answer = await Answer.findById(answerId)
+        if (!answer) throw new Error("answer not found")
+
+        await Answer.deleteOne({ _id: answerId })
+        await Question.updateMany({ _id: answer.question }, { $pull: { answers: answerId } })
+        await Interaction.deleteMany({ answer: answerId })
 
         revalidatePath(path)
     } catch (error) {

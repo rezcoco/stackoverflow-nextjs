@@ -1,4 +1,6 @@
-import { cn } from "@/lib/utils";
+"use client";
+
+import { cn, formUrlQuery, removeFormUrlQuery } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -8,23 +10,51 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-type FilterProps = {
-  filters: {
-    name: string;
-    value: string;
-  }[];
+type F = {
+  name: string;
+  value: string;
+};
+
+type FilterProps<T> = {
+  filters: ReadonlyArray<T>;
   className?: string;
   containerClasses?: string;
 };
 
-const Filter: React.FC<FilterProps> = (props) => {
+const Filter = <T extends F>(props: FilterProps<T>) => {
+  const searchQuery = useSearchParams();
+  const [filter, setFilter] = React.useState(searchQuery.get("filter") || "");
+  const pathname = usePathname();
+  const router = useRouter();
+
+  function onValueChange(value: string) {
+    if (filter === value) {
+      setFilter("");
+      const newUrl = removeFormUrlQuery({
+        params: searchQuery.toString(),
+        keys: ["filter"],
+      });
+
+      router.push(`${pathname}?${newUrl}`, { scroll: false });
+    } else {
+      setFilter(value);
+      const newUrl = formUrlQuery({
+        params: searchQuery.toString(),
+        key: "filter",
+        value,
+      });
+
+      router.push(`${pathname}?${newUrl}`, { scroll: false });
+    }
+  }
   return (
     <div className={cn("relative", props.containerClasses)}>
-      <Select>
+      <Select onValueChange={(value) => onValueChange(value)} value={filter}>
         <SelectTrigger
           className={cn(
-            "body-regular light-border background-light800_dark300 text-dark500_light700 border px-5 py-2.5",
+            "body-regular light-border background-light800_dark300 text-dark500_light700 border px-5 py-2.5 flex gap-2 items-center",
             props.className
           )}
         >

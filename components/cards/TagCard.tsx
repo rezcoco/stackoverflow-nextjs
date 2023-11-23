@@ -1,9 +1,9 @@
-import { TagType } from "@/database/shared.types";
+import { TTagDoc } from "@/database/tag.model";
 import { getPluralString } from "@/lib/utils";
 import React from "react";
 
 type TagCardProps = {
-  tag: Partial<TagType>;
+  tag: Partial<TTagDoc>;
 };
 
 const TagCard: React.FC<TagCardProps> = ({ tag }) => {

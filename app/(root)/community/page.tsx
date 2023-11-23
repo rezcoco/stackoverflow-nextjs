@@ -1,13 +1,21 @@
 import UserCard from "@/components/cards/UserCard";
 import Filter from "@/components/shared/Filter";
+import Pagination from "@/components/shared/Pagination";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { UserFilters } from "@/constants/filters";
 import { getAllUsers } from "@/lib/actions/user.action";
+import { SearchParamsProps } from "@/types";
 import Link from "next/link";
 import React from "react";
 
-const Community = async () => {
-  const result = await getAllUsers({});
+const Community = async ({ searchParams }: SearchParamsProps) => {
+  const page = searchParams.page ? Number(searchParams.page) : 1;
+  const result = await getAllUsers({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page,
+  });
+
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">All questions</h1>
@@ -22,10 +30,9 @@ const Community = async () => {
         <Filter
           filters={UserFilters}
           className={"min-h-[56px] sm:min-w-[170px]"}
-          containerClasses={"hidden max-md:flex"}
         />
       </div>
-      <section className="mt-12 flex-wrap gap-4">
+      <section className="mt-12 flex flex-wrap gap-4">
         {result.users.length > 0 ? (
           result.users.map((user) => <UserCard key={user._id} user={user} />)
         ) : (
@@ -37,6 +44,15 @@ const Community = async () => {
           </div>
         )}
       </section>
+      {result.users.length > 0 && (
+        <div className="mt-10">
+          <Pagination
+            page={page}
+            pathname="/community"
+            isNext={result.isNext}
+          />
+        </div>
+      )}
     </>
   );
 };

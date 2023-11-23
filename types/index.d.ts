@@ -57,3 +57,14 @@ export interface BadgeCounts {
 }
 
 export type BadgeCriteriaType = keyof typeof BADGE_CRITERIA;
+
+export type FormUrlQueryParams = {
+    params: string
+    key: string
+    value: string | number
+}
+
+export type RemoveFormUrlQueryParams = {
+    params: string
+    keys: string[]
+}

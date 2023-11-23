@@ -3,64 +3,72 @@ import React from "react";
 import RenderTag from "../shared/RenderTag";
 import Metric from "../shared/Metric";
 import { getFormatNumber, getPluralString, getTimestamp } from "@/lib/utils";
-import { PopulatedQuestionType } from "@/database/shared.types";
+import { Populated } from "@/database/shared.types";
+import EditDeleteActions from "../shared/EditDeleteActions";
+import { SignedIn } from "@clerk/nextjs";
+import { TQuestionDoc } from "@/database/question.model";
 
-type QuestionCardProps = PopulatedQuestionType;
+type QuestionCardProps = {
+  question: Populated<TQuestionDoc, "author" | "tags">;
+  clerkId: string | null;
+};
 
-const QuestionCard: React.FC<QuestionCardProps> = (props) => {
+const QuestionCard: React.FC<QuestionCardProps> = async ({
+  question,
+  clerkId,
+}) => {
+  const isAuthor = clerkId && clerkId === question.author.clerkId;
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
         <div>
           <span className="subtle-regular text-dark400_light700 line-clamp-1 sm:hidden">
-            {getTimestamp(props.createdAt)}
+            {getTimestamp(question.createdAt)}
           </span>
-          <Link href={`/question/${props._id}`}>
+          <Link href={`/question/${question._id}`}>
             <h3 className="base-semibold sm:h3-bold text-dark200_light900 line-clamp-1">
-              {props.title}
+              {question.title}
             </h3>
           </Link>
         </div>
+        {isAuthor && (
+          <SignedIn>
+            <EditDeleteActions type="question" itemId={question.id} />
+          </SignedIn>
+        )}
       </div>
       <div className="mt-3.5 flex flex-wrap gap-2">
-        {props.tags?.map((item) => (
-          <RenderTag
-            key={item._id}
-            _id={item._id}
-            name={item.name}
-            showCount={false}
-          />
-        ))}
+        {question.tags?.map((tag) => <RenderTag key={tag?._id} tag={tag} />)}
       </div>
       <div className="flex-between mt-6 w-full flex-wrap gap-6">
         <Metric
-          imgUrl={props.author.picture}
+          imgUrl={question.author.picture}
           alt="avatar"
-          value={props.author?.name}
-          title={`- ${getTimestamp(props.createdAt)}`}
-          href={`/profile/${props.author?.clerkId}`}
+          value={question.author.name}
+          title={`- ${getTimestamp(question.createdAt)}`}
+          href={`/profile/${question.author?.clerkId}`}
           className="body-medium text-dark400_light700"
-          isAuthor={true}
+          isAuthor={isAuthor || false}
         />
         <Metric
           imgUrl="/assets/icons/like.svg"
           alt="upvotes"
-          value={getFormatNumber(props.upvotes.length)}
-          title={getPluralString(props.upvotes.length, "upvote")}
+          value={getFormatNumber(question.upvotes.length)}
+          title={getPluralString(question.upvotes.length, "upvote")}
           className="small-medium text-dark400_light800"
         />
         <Metric
           imgUrl="/assets/icons/message.svg"
           alt="messages"
-          value={getFormatNumber(props.answers.length)}
-          title={getPluralString(props.answers.length, "answer")}
+          value={getFormatNumber(question.answers.length)}
+          title={getPluralString(question.answers.length, "answer")}
           className="small-medium text-dark400_light800"
         />
         <Metric
           imgUrl="/assets/icons/eye.svg"
           alt="eye"
-          value={getFormatNumber(props.views)}
-          title={getPluralString(props.views, "view")}
+          value={getFormatNumber(question.views)}
+          title={getPluralString(question.views, "view")}
           className="small-medium text-dark400_light800"
         />
       </div>

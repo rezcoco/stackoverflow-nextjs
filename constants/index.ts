@@ -19,8 +19,8 @@ export const sidebarLinks: SidebarLink[] = [
     },
     {
         imgURL: "/assets/icons/star.svg",
-        route: "/collections",
-        label: "Collections",
+        route: "/collection",
+        label: "Collection",
     },
     {
         imgURL: "/assets/icons/suitcase.svg",
@@ -70,4 +70,4 @@ export const BADGE_CRITERIA = {
         SILVER: 10000,
         GOLD: 100000,
     },
-};
+}

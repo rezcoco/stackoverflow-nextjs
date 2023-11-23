@@ -1,7 +1,25 @@
 import mongoose, { Model, model, models } from "mongoose";
-import { UserType } from "./shared.types";
+import { TQuestionDoc } from "./question.model";
 
-const userSchema = new mongoose.Schema<UserType>(
+export type TUser = {
+    clerkId: string
+    name: string
+    username: string
+    email: string
+    password?: string
+    bio?: string
+    picture: string
+    location?: string
+    portfolioWebsite?: string
+    reputation?: number
+    saved: mongoose.Types.ObjectId[] | TQuestionDoc[]
+}
+
+export type TUserDoc = TUser & mongoose.Document & {
+    joinedAt: Date
+}
+
+const userSchema = new mongoose.Schema<TUserDoc>(
     {
         clerkId: { type: String, required: true },
         name: { type: String, required: true },
@@ -18,6 +36,6 @@ const userSchema = new mongoose.Schema<UserType>(
     }
 )
 
-const User: Model<mongoose.InferSchemaType<typeof userSchema>> = models.User || model("User", userSchema)
+const User: Model<TUserDoc> = models.User || model("User", userSchema)
 
 export default User

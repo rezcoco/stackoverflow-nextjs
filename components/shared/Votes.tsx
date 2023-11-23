@@ -1,6 +1,7 @@
 "use client";
 
 import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
+import { viewQuestion } from "@/lib/actions/interaction.action";
 import {
   downvoteQuestion,
   upvoteQuestion,
@@ -8,22 +9,37 @@ import {
 import { toggleSaveQuestion } from "@/lib/actions/user.action";
 import { getFormatNumber } from "@/lib/utils";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
+type VotesWithSave = {
+  hasSaved: boolean;
+  type: "question";
+};
+
+type VotesWithoutSave = {
+  type: "answer";
+};
+
 type Props = {
-  type: "question" | "answer";
   itemId: string;
   userId: string;
   upvotes: number;
   downvotes: number;
   hasUpvoted: boolean;
   hasDownvoted: boolean;
-  hasSaved?: boolean;
-};
+} & (VotesWithSave | VotesWithoutSave);
 
 const Votes: React.FC<Props> = (props) => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    viewQuestion({
+      userId: props.userId,
+      questionId: props.itemId,
+    });
+  }, [props.userId, props.itemId, pathname, router]);
 
   async function handelVote(action: "upvote" | "downvote") {
     if (!props.userId) return;
@@ -58,7 +74,7 @@ const Votes: React.FC<Props> = (props) => {
     await toggleSaveQuestion({
       userId: props.userId,
       questionId: props.itemId,
-      hasSaved: props.hasSaved!,
+      hasSaved: "hasSaved" in props && props.hasSaved,
       path: pathname,
     });
   }

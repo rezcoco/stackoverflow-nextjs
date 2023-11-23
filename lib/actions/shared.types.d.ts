@@ -1,5 +1,4 @@
 import { UserType } from "@/database/shared.types";
-import mongoose from "mongoose";
 
 export interface GetQuestionParams {
     page?: number;
@@ -12,7 +11,7 @@ export interface CreateQuestionParams {
     title: string
     content: string
     tags: string[]
-    author: mongoose.Schema.Types.ObjectId | UserType
+    author: string
     path: string
 }
 
@@ -75,6 +74,14 @@ export interface GetQuestionsParams {
 export interface GetQuestionByIdParams {
     questionId: string;
 }
+
+export interface GetQuestionsByUserId {
+    userId: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface GetAnswersByUserId extends GetQuestionsByUserId { }
 
 export interface QuestionVoteParams {
     questionId: string;

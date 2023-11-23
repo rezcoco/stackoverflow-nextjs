@@ -9,7 +9,11 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-const LeftSidebar = () => {
+type Props = {
+  userId: string | null;
+};
+
+const LeftSidebar: React.FC<Props> = ({ userId }) => {
   const pathname = usePathname();
 
   return (
@@ -27,7 +31,9 @@ const LeftSidebar = () => {
                 "flex gap-4 items-center justify-start bg-transparent p-4 text-dark300_light900",
                 { "text-light-900 primary-gradient rounded-lg": isActive }
               )}
-              href={item.route}
+              href={
+                item.route === "/profile" ? `/profile/${userId}` : item.route
+              }
             >
               <Image
                 src={item.imgURL}

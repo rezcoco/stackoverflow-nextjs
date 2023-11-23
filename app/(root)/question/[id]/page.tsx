@@ -7,19 +7,21 @@ import Votes from "@/components/shared/Votes";
 import { getQuestionById } from "@/lib/actions/question.action";
 import { getUserById } from "@/lib/actions/user.action";
 import { getFormatNumber, getPluralString, getTimestamp } from "@/lib/utils";
+import { SearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
-type Props = {
+type Props = SearchParamsProps & {
   params: {
     id: string;
   };
 };
 
-const QuestionDetail: React.FC<Props> = async ({ params }) => {
+const QuestionDetail: React.FC<Props> = async ({ params, searchParams }) => {
+  const page = searchParams.page ? Number(searchParams.page) : 1;
   const result = await getQuestionById({ questionId: params.id });
   const { userId } = auth();
 
@@ -27,6 +29,7 @@ const QuestionDetail: React.FC<Props> = async ({ params }) => {
   if (!result) redirect("/");
 
   const mongoUser = await getUserById({ userId });
+  if (!mongoUser) redirect("/");
 
   return (
     <>
@@ -54,9 +57,9 @@ const QuestionDetail: React.FC<Props> = async ({ params }) => {
               downvotes={result.downvotes.length}
               hasUpvoted={result.upvotes.includes(mongoUser?.id)}
               hasDownvoted={result.downvotes.includes(mongoUser?.id)}
-              hasSaved={mongoUser?.saved.includes(result?.id)}
+              hasSaved={mongoUser.saved.includes(result.id)}
               itemId={result.id}
-              userId={result.author.id}
+              userId={mongoUser.id}
             />
           </div>
         </div>
@@ -92,14 +95,21 @@ const QuestionDetail: React.FC<Props> = async ({ params }) => {
       <ParseHTML data={result!.content} />
       <div className="mt-8 flex flex-wrap gap-2">
         {result?.tags.map((tag) => (
-          <RenderTag key={tag.id} _id={tag.id} name={tag.name} />
+          <RenderTag
+            key={tag?.id}
+            tag={tag}
+            totalQuestions={tag.questions.length}
+          />
         ))}
       </div>
       <AllAnswers
         questionId={result?.id}
         userId={mongoUser?.id}
         totalAnswers={result.answers.length}
+        page={page}
+        filter={searchParams.filter}
       />
+      {/* Form */}
       <Answer
         userId={mongoUser?.id}
         questionId={result?.id}

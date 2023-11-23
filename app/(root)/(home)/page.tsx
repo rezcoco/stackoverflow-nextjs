@@ -7,9 +7,18 @@ import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
 import Link from "next/link";
 import { getQuestions } from "@/lib/actions/question.action";
+import { auth } from "@clerk/nextjs";
+import { SearchParamsProps } from "@/types";
+import Pagination from "@/components/shared/Pagination";
 
-export default async function Home() {
-  const questions = await getQuestions({});
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { userId } = auth();
+  const page = searchParams.page ? Number(searchParams.page) : 1;
+  const result = await getQuestions({
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? Number(searchParams.page) : 1,
+  });
 
   return (
     <>
@@ -37,9 +46,13 @@ export default async function Home() {
       </div>
       <HomeFilters />
       <div className="mt-10 flex w-full flex-col gap-6">
-        {questions.length > 0 ? (
-          questions.map((question) => (
-            <QuestionCard key={question._id} {...question} />
+        {result.questions.length > 0 ? (
+          result.questions.map((question) => (
+            <QuestionCard
+              key={question._id}
+              clerkId={userId}
+              question={question}
+            />
           ))
         ) : (
           <NoResult
@@ -52,6 +65,11 @@ export default async function Home() {
           />
         )}
       </div>
+      {result.questions.length > 0 && (
+        <div className="mt-10">
+          <Pagination page={page} isNext={result.isNext} pathname="/" />
+        </div>
+      )}
     </>
   );
 }

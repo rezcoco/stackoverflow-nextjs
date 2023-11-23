@@ -1,5 +1,8 @@
+import { BadgeCriteriaType, FormUrlQueryParams, RemoveFormUrlQueryParams } from "@/types"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import qs from "query-string"
+import { BADGE_CRITERIA } from "@/constants"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -65,4 +68,48 @@ export function getFormatNumber(num: number) {
     const divide = Number.isInteger(num) ? num / billion : (num / billion).toFixed(1)
     return `${divide}b`
   }
+}
+
+export function formUrlQuery({ params, key, value }: FormUrlQueryParams) {
+  const currentUrl = qs.parse(params)
+
+  currentUrl[key] = String(value)
+
+  return qs.stringify(currentUrl)
+}
+
+export function removeFormUrlQuery({ keys, params }: RemoveFormUrlQueryParams) {
+  const currentUrl = qs.parse(params)
+
+  keys.forEach(key => {
+    delete currentUrl[key]
+  })
+
+  return qs.stringify(currentUrl)
+}
+
+
+export function getBadges(criteria: Array<{
+  type: BadgeCriteriaType,
+  count: number
+}>) {
+  const badgeCounts = {
+    "BRONZE": 0,
+    "SILVER": 0,
+    "GOLD": 0
+  }
+
+  criteria.forEach(({ type, count }) => {
+    const BADGE = BADGE_CRITERIA[type]
+
+    for (const medal in BADGE) {
+      const medalPoint = BADGE[medal as keyof typeof BADGE]
+
+      if (count >= medalPoint) {
+        badgeCounts[medal as keyof typeof BADGE] += 1
+      }
+    }
+  })
+
+  return badgeCounts
 }

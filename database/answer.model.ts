@@ -1,8 +1,20 @@
-import mongoose, { Model, model, models } from "mongoose";
-import { AnswerType } from "./shared.types";
+import mongoose, { Model, model, models, Types, Document } from "mongoose";
+import { TUserDoc } from "./user.model";
+import { TQuestionDoc } from "./question.model";
 
+export type TAnswer = {
+    author: Types.ObjectId | TUserDoc
+    question: Types.ObjectId | TQuestionDoc
+    content: string
+    upvotes: Types.ObjectId[] | TUserDoc[]
+    downvotes: Types.ObjectId[] | TUserDoc[]
+}
 
-const answerSchema = new mongoose.Schema<AnswerType>({
+export type TAnswerDoc = TAnswer & Document & {
+    createdAt: Date
+}
+
+const answerSchema = new mongoose.Schema<TAnswerDoc>({
     author: { required: true, type: mongoose.Schema.Types.ObjectId, ref: "User" },
     question: { required: true, type: mongoose.Schema.Types.ObjectId, ref: "Question" },
     content: { required: true, type: String },
@@ -11,6 +23,6 @@ const answerSchema = new mongoose.Schema<AnswerType>({
     createdAt: { type: Date, default: Date.now }
 })
 
-const Answer: Model<mongoose.InferSchemaType<typeof answerSchema>> = models.Answer || model("Answer", answerSchema)
+const Answer: Model<TAnswerDoc> = models.Answer || model("Answer", answerSchema)
 
 export default Answer

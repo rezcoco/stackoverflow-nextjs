@@ -1,7 +1,19 @@
-import mongoose, { Schema, model, models, Model } from "mongoose";
-import { TagType } from "./shared.types";
+import { Schema, model, models, Model, Types, Document } from "mongoose";
+import { TQuestionDoc } from "./question.model";
+import { TUserDoc } from "./user.model";
 
-const tagSchema = new Schema<TagType>({
+export type TTag = {
+    name: string
+    description: string
+    questions: Types.ObjectId[] | TQuestionDoc[]
+    followers: Types.ObjectId[] | TUserDoc[]
+}
+
+export type TTagDoc = TTag & Document & {
+    createdAt: Date
+}
+
+const tagSchema = new Schema<TTagDoc>({
     name: { required: true, unique: true, type: String },
     description: { type: String },
     questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
@@ -9,6 +21,6 @@ const tagSchema = new Schema<TagType>({
     createdAt: { type: Date, default: Date.now }
 })
 
-const Tag: Model<mongoose.InferSchemaType<typeof tagSchema>> = models.Tag || model("Tag", tagSchema)
+const Tag: Model<TTagDoc> = models.Tag || model("Tag", tagSchema)
 
 export default Tag

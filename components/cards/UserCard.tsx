@@ -1,13 +1,13 @@
-import { UserType } from "@/database/shared.types";
 import { getTopInteractedTags } from "@/lib/actions/tag.action";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import RenderTag from "../shared/RenderTag";
 import { Badge } from "../ui/badge";
+import { TUserDoc } from "@/database/user.model";
 
 type UserCardProps = {
-  user: Partial<UserType>;
+  user: Partial<TUserDoc>;
 };
 
 const UserCard: React.FC<UserCardProps> = async ({ user }) => {
@@ -35,7 +35,7 @@ const UserCard: React.FC<UserCardProps> = async ({ user }) => {
           {interactedTags.length > 0 ? (
             <div className="flex items-center gap-2">
               {interactedTags.map((tag) => (
-                <RenderTag key={tag._id} _id={tag._id} name={tag.name} />
+                <RenderTag key={tag?._id} tag={tag} />
               ))}
             </div>
           ) : (
