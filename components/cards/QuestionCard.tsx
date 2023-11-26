@@ -40,7 +40,7 @@ const QuestionCard: React.FC<QuestionCardProps> = async ({
       <div className="mt-3.5 flex flex-wrap gap-2">
         {question.tags?.map((tag) => <RenderTag key={tag?._id} tag={tag} />)}
       </div>
-      <div className="flex-between mt-6 w-full flex-wrap gap-6">
+      <div className="flex-between mt-6 w-full flex-wrap gap-3">
         <Metric
           imgUrl={question.author.picture}
           alt="avatar"
@@ -50,27 +50,29 @@ const QuestionCard: React.FC<QuestionCardProps> = async ({
           className="body-medium text-dark400_light700"
           isAuthor={isAuthor || false}
         />
-        <Metric
-          imgUrl="/assets/icons/like.svg"
-          alt="upvotes"
-          value={getFormatNumber(question.upvotes.length)}
-          title={getPluralString(question.upvotes.length, "upvote")}
-          className="small-medium text-dark400_light800"
-        />
-        <Metric
-          imgUrl="/assets/icons/message.svg"
-          alt="messages"
-          value={getFormatNumber(question.answers.length)}
-          title={getPluralString(question.answers.length, "answer")}
-          className="small-medium text-dark400_light800"
-        />
-        <Metric
-          imgUrl="/assets/icons/eye.svg"
-          alt="eye"
-          value={getFormatNumber(question.views)}
-          title={getPluralString(question.views, "view")}
-          className="small-medium text-dark400_light800"
-        />
+        <div className="flex items-center gap-3 max-sm:flex-wrap max-sm:justify-start">
+          <Metric
+            imgUrl="/assets/icons/like.svg"
+            alt="upvotes"
+            value={getFormatNumber(question.upvotes.length)}
+            title={getPluralString(question.upvotes.length, "upvote")}
+            className="small-medium text-dark400_light800"
+          />
+          <Metric
+            imgUrl="/assets/icons/message.svg"
+            alt="messages"
+            value={getFormatNumber(question.answers.length)}
+            title={getPluralString(question.answers.length, "answer")}
+            className="small-medium text-dark400_light800"
+          />
+          <Metric
+            imgUrl="/assets/icons/eye.svg"
+            alt="eye"
+            value={getFormatNumber(question.views)}
+            title={getPluralString(question.views, "view")}
+            className="small-medium text-dark400_light800"
+          />
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { Inter, Space_Grotesk as SpaceGrotesk } from "next/font/google";
 import "./globals.css";
 import "../styles/prism.css";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,7 +44,10 @@ export default function RootLayout({
             },
           }}
         >
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster />
+          </ThemeProvider>
         </ClerkProvider>
       </body>
     </html>

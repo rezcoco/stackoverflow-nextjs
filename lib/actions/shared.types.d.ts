@@ -48,7 +48,7 @@ export interface SearchParams {
 }
 
 export interface RecommendedParams {
-    userId: string;
+    clerkId: string;
     page?: number;
     pageSize?: number;
     searchQuery?: string;
@@ -56,7 +56,7 @@ export interface RecommendedParams {
 
 export interface ViewQuestionParams {
     questionId: string;
-    userId: string | undefined;
+    userId: string | null;
 }
 
 export interface JobFilterParams {

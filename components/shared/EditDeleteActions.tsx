@@ -4,6 +4,7 @@ import { deleteQuestion } from "@/lib/actions/question.action";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "../ui/use-toast";
 
 type Props = {
   type: "question" | "answer";
@@ -13,16 +14,21 @@ type Props = {
 const EditDeleteActions: React.FC<Props> = ({ type, itemId }) => {
   const pathname = usePathname();
   const router = useRouter();
+
   function handleEdit() {
     router.push(`/question/edit/${itemId}`);
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (type === "question") {
-      deleteQuestion({ questionId: itemId, path: pathname });
+      await deleteQuestion({ questionId: itemId, path: pathname });
     } else if (type === "answer") {
-      deleteAnswer({ answerId: itemId, path: pathname });
+      await deleteAnswer({ answerId: itemId, path: pathname });
     }
+
+    return toast({
+      title: `${type} deleted`,
+    });
   }
   return (
     <div className="flex items-center justify-end gap-3 max-sm:w-full">

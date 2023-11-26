@@ -34,7 +34,7 @@ export async function createAnswer(params: CreateAnswerParams) {
 
         revalidatePath(params.path)
 
-        return answer
+        return true
     } catch (error) {
         console.log(error)
         throw error

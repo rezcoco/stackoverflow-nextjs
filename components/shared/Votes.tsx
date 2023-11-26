@@ -11,6 +11,7 @@ import { getFormatNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "../ui/use-toast";
 
 type VotesWithSave = {
   hasSaved: boolean;
@@ -42,7 +43,12 @@ const Votes: React.FC<Props> = (props) => {
   }, [props.userId, props.itemId, pathname, router]);
 
   async function handelVote(action: "upvote" | "downvote") {
-    if (!props.userId) return;
+    if (!props.userId) {
+      return toast({
+        title: "Please log in",
+        description: "You must logged in to perform this action",
+      });
+    }
 
     const params = {
       userId: props.userId,
@@ -59,6 +65,10 @@ const Votes: React.FC<Props> = (props) => {
       } else if (props.type === "answer") {
         await upvoteAnswer(Object.assign(params, { answerId: props.itemId }));
       }
+
+      return toast({
+        title: `${props.hasUpvoted ? "Upvote removed" : "Upvote Successful"}`,
+      });
     } else if (action === "downvote") {
       if (props.type === "question") {
         await downvoteQuestion(
@@ -67,15 +77,36 @@ const Votes: React.FC<Props> = (props) => {
       } else if (props.type === "answer") {
         await downvoteAnswer(Object.assign(params, { answerId: props.itemId }));
       }
+
+      return toast({
+        title: `${
+          props.downvotes ? "Downvote removed" : "Downvote Successful"
+        }`,
+      });
     }
   }
 
   async function handleSave() {
+    if (!props.userId) {
+      return toast({
+        title: "Please log in",
+        description: "You must logged in to perform this action",
+      });
+    }
+
     await toggleSaveQuestion({
       userId: props.userId,
       questionId: props.itemId,
       hasSaved: "hasSaved" in props && props.hasSaved,
       path: pathname,
+    });
+
+    return toast({
+      title: `${
+        "hasSaved" in props && props.hasSaved
+          ? "Question removed from your collection"
+          : "Question saved"
+      }`,
     });
   }
 

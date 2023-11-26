@@ -8,6 +8,11 @@ import { getAllTags } from "@/lib/actions/tag.action";
 import { SearchParamsProps } from "@/types";
 import Link from "next/link";
 import React from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tags",
+};
 
 const Tags = async ({ searchParams }: SearchParamsProps) => {
   const page = searchParams.page ? Number(searchParams.page) : 1;
@@ -16,6 +21,7 @@ const Tags = async ({ searchParams }: SearchParamsProps) => {
     filter: searchParams.filter,
     page,
   });
+
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">Tags</h1>

@@ -74,8 +74,8 @@ const AllAnswers: React.FC<Props> = async ({
                       userId={userId}
                       upvotes={answer.upvotes.length}
                       downvotes={answer.downvotes.length}
-                      hasUpvoted={answer.upvotes.includes(answer.author.id)}
-                      hasDownvoted={answer.downvotes.includes(answer.author.id)}
+                      hasUpvoted={answer.upvotes.includes(userId as any)}
+                      hasDownvoted={answer.downvotes.includes(userId as any)}
                     />
                   </div>
                 </div>

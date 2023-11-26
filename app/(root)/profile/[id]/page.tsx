@@ -18,6 +18,16 @@ type Props = SearchParamsProps & {
   };
 };
 
+export async function generateMetadata({ params }: Props) {
+  const userInfo = await getUserInfo({ userId: params.id });
+
+  return {
+    title:
+      `${userInfo.user.name} (@${userInfo.user.username}) | DevOverflow` ||
+      "Profile",
+  };
+}
+
 const Profile: React.FC<Props> = async ({ params, searchParams }) => {
   const page = searchParams.page ? Number(searchParams.page) : 1;
   const { userId: clerkId } = auth();

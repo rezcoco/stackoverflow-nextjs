@@ -2,14 +2,14 @@
 
 import Question, { TQuestionDoc } from "@/database/question.model"
 import { connectToDatabase } from "../mongoose"
-import mongoose, { FilterQuery } from "mongoose"
-import Tag from "@/database/tag.model"
-import { CreateQuestionParams, DeleteQuestionParams, EditQuestionParams, GetQuestionByIdParams, GetQuestionParams, QuestionVoteParams } from "./shared.types"
+import mongoose, { FilterQuery, Types } from "mongoose"
+import Tag, { TTagDoc } from "@/database/tag.model"
+import { CreateQuestionParams, DeleteQuestionParams, EditQuestionParams, GetQuestionByIdParams, GetQuestionParams, QuestionVoteParams, RecommendedParams } from "./shared.types"
 import User from "@/database/user.model"
 import { Populated } from "@/database/shared.types"
 import { revalidatePath } from "next/cache"
 import Answer from "@/database/answer.model"
-import Interaction from "@/database/interaction.model"
+import Interaction, { TInteractionDoc } from "@/database/interaction.model"
 
 
 export async function getQuestions(params: GetQuestionParams) {
@@ -207,6 +207,8 @@ export async function deleteQuestion(params: DeleteQuestionParams) {
         await Tag.updateMany({ questions: questionId }, { $pull: { questions: questionId } })
 
         revalidatePath(path)
+
+        return true
     } catch (error) {
         console.log(error)
         throw error
@@ -244,6 +246,64 @@ export async function getHotQuestions() {
 
         ])
         return questions
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+type TInteractionReturn = Populated<TInteractionDoc, "tags">
+type TPopulatedRecommendedQuestions = Populated<TQuestionDoc, "tags" | "author">
+
+export async function getRecommendedQuestions(params: RecommendedParams) {
+    try {
+        await connectToDatabase()
+
+        const { clerkId, page = 1, pageSize = 10, searchQuery } = params
+
+        const skip = (page - 1) * pageSize
+
+        const user = await User.findOne({ clerkId })
+        if (!user) throw new Error("user not found")
+
+        const userInteraction = await Interaction.find({ _id: user._id }).populate("tags").exec() as Array<TInteractionReturn>;
+
+        const userTags = userInteraction.reduce((tags, interaction) => {
+            if (interaction.tags) {
+                tags = tags.concat(interaction.tags)
+            }
+
+            return tags
+        }, [] as Array<TTagDoc>)
+
+        const distinctTags = [...new Set<Types.ObjectId>(userTags.map(tag => tag._id))]
+
+        const query: FilterQuery<TQuestionDoc> = {
+            $and: [
+                { tags: { $in: distinctTags } },
+                { author: { $ne: user._id } }
+            ]
+        }
+
+        if (searchQuery) {
+            query.$or = [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { content: { $regex: searchQuery, $options: "i" } }
+            ]
+        }
+
+        const allDocs = await Question.countDocuments(query)
+
+        const questions = await Question.find(query)
+            .populate("tags").populate("author")
+            .skip(skip).limit(pageSize) as Array<TPopulatedRecommendedQuestions>;
+
+        const isNext = questions.length + skip < allDocs
+
+        return {
+            isNext,
+            questions
+        }
     } catch (error) {
         console.log(error)
         throw error

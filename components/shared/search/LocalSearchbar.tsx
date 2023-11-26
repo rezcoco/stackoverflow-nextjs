@@ -69,7 +69,7 @@ const LocalSearchbar: React.FC<LocalSearchbarProps> = (props) => {
           placeholder={props.placeholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="no-focus paragraph-regular background-light800_darkgradient text-dark400_light700 border-none shadow-none outline-none"
+          className="no-focus paragraph-regular text-dark400_light700 border-none bg-transparent shadow-none outline-none"
         />
         {props.iconPosition === "right" && icon}
       </div>

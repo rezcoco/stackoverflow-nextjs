@@ -6,24 +6,41 @@ import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
 import Link from "next/link";
-import { getQuestions } from "@/lib/actions/question.action";
+import {
+  getQuestions,
+  getRecommendedQuestions,
+} from "@/lib/actions/question.action";
 import { auth } from "@clerk/nextjs";
 import { SearchParamsProps } from "@/types";
 import Pagination from "@/components/shared/Pagination";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+};
 
 export default async function Home({ searchParams }: SearchParamsProps) {
   const { userId } = auth();
   const page = searchParams.page ? Number(searchParams.page) : 1;
-  const result = await getQuestions({
-    searchQuery: searchParams.q,
-    filter: searchParams.filter,
-    page: searchParams.page ? Number(searchParams.page) : 1,
-  });
+  let result;
 
+  if (searchParams.filter === "recommended" && userId) {
+    result = await getRecommendedQuestions({
+      clerkId: userId,
+    });
+
+    console.log(result);
+  } else {
+    result = await getQuestions({
+      searchQuery: searchParams.q,
+      filter: searchParams.filter,
+      page: searchParams.page ? Number(searchParams.page) : 1,
+    });
+  }
   return (
     <>
-      <div className="h1-bold text-dark100_light900 flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
-        <h1>All questions</h1>
+      <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
+        <h1 className="h1-bold text-dark100_light900 ">All questions</h1>
         <Link className="flex justify-end max-sm:w-full" href="/ask-question">
           <Button className="primary-gradient min-h-[46px] px-4 py-3 !text-light-900">
             Ask a question

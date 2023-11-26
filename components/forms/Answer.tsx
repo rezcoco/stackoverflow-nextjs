@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { createAnswer } from "@/lib/actions/answer.action";
 import { usePathname } from "next/navigation";
+import { toast } from "../ui/use-toast";
 
 type Props = {
   userId: string;
@@ -29,6 +30,7 @@ const Answer: React.FC<Props> = ({ userId, questionId, question }) => {
   const { theme } = useTheme();
   const pathname = usePathname();
   const [isSubmiting, setIsSubmiting] = React.useState(false);
+  const [isGenAiSubmiting, setIsGenAiSubmiting] = React.useState(false);
   const form = useForm<AnswerSchemaType>({
     resolver: zodResolver(AnswerSchemaValidation),
     defaultValues: {
@@ -37,7 +39,15 @@ const Answer: React.FC<Props> = ({ userId, questionId, question }) => {
   });
 
   async function handleCreateAnswer(values: AnswerSchemaType) {
+    if (!userId) {
+      return toast({
+        title: "Please log in",
+        description: "You must logged in to perform this action",
+      });
+    }
+
     setIsSubmiting(true);
+
     try {
       await createAnswer({
         content: values.answer,
@@ -58,13 +68,56 @@ const Answer: React.FC<Props> = ({ userId, questionId, question }) => {
     }
   }
 
+  async function handleAiGeneratedAnswer() {
+    if (!userId) {
+      return toast({
+        title: "Please log in",
+        description: "You must logged in to perform this action",
+      });
+    }
+    setIsGenAiSubmiting(true);
+
+    try {
+      const res = await fetch(`/api/chatgpt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question }),
+      });
+
+      const aiAnswer = await res.json();
+
+      const formatedAiAnswer =
+        typeof aiAnswer?.data === "string"
+          ? aiAnswer.data.replace(/\n/g, "<br />")
+          : "";
+
+      console.log(formatedAiAnswer);
+
+      if (editorRef.current) {
+        const editor = editorRef.current as any;
+        editor.setContent(formatedAiAnswer);
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    } finally {
+      setIsGenAiSubmiting(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
         <h4 className="paragraph-semibold text-dark400_light800">
           Write your answer here
         </h4>
-        <Button className="btn light-border-2 gap-1.5 rounded-md px-4 py-2.5 text-primary-500 shadow-none">
+        <Button
+          disabled={isGenAiSubmiting}
+          onClick={() => handleAiGeneratedAnswer()}
+          className="btn light-border-2 gap-1.5 rounded-md px-4 py-2.5 text-primary-500 shadow-none"
+        >
           <Image
             src="/assets/icons/stars.svg"
             alt="star"
@@ -72,7 +125,7 @@ const Answer: React.FC<Props> = ({ userId, questionId, question }) => {
             height={12}
             className=""
           />
-          <p>Generate an AI answer</p>
+          <p>{isGenAiSubmiting ? "Generating..." : "Generate an AI answer"}</p>
         </Button>
       </div>
       <Form {...form}>

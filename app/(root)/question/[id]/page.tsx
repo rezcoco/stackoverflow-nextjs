@@ -25,11 +25,9 @@ const QuestionDetail: React.FC<Props> = async ({ params, searchParams }) => {
   const result = await getQuestionById({ questionId: params.id });
   const { userId } = auth();
 
-  if (!userId) redirect("/sign-in");
   if (!result) redirect("/");
 
-  const mongoUser = await getUserById({ userId });
-  if (!mongoUser) redirect("/");
+  const mongoUser = userId && (await getUserById({ userId }));
 
   return (
     <>
@@ -55,11 +53,17 @@ const QuestionDetail: React.FC<Props> = async ({ params, searchParams }) => {
               type="question"
               upvotes={result.upvotes.length}
               downvotes={result.downvotes.length}
-              hasUpvoted={result.upvotes.includes(mongoUser?.id)}
-              hasDownvoted={result.downvotes.includes(mongoUser?.id)}
-              hasSaved={mongoUser.saved.includes(result.id)}
+              hasUpvoted={
+                mongoUser ? result.upvotes.includes(mongoUser.id) : false
+              }
+              hasDownvoted={
+                mongoUser ? result.downvotes.includes(mongoUser.id) : false
+              }
+              hasSaved={
+                mongoUser ? mongoUser?.saved.includes(result.id) : false
+              }
               itemId={result.id}
-              userId={mongoUser.id}
+              userId={mongoUser && mongoUser.id}
             />
           </div>
         </div>
@@ -104,14 +108,14 @@ const QuestionDetail: React.FC<Props> = async ({ params, searchParams }) => {
       </div>
       <AllAnswers
         questionId={result?.id}
-        userId={mongoUser?.id}
+        userId={mongoUser && mongoUser._id}
         totalAnswers={result.answers.length}
         page={page}
         filter={searchParams.filter}
       />
       {/* Form */}
       <Answer
-        userId={mongoUser?.id}
+        userId={mongoUser && mongoUser.id}
         questionId={result?.id}
         question={result!.content}
       />

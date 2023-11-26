@@ -5,7 +5,6 @@ import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { getQuestionByTagId } from "@/lib/actions/tag.action";
 import { SearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 import React from "react";
 
 type Props = SearchParamsProps & {
@@ -16,7 +15,6 @@ type Props = SearchParamsProps & {
 
 const TagsDetail: React.FC<Props> = async ({ params, searchParams }) => {
   const { userId } = auth();
-  if (!userId) redirect("/");
   const page = searchParams.page ? Number(searchParams.page) : 1;
   const result = await getQuestionByTagId({
     tagId: params.id,

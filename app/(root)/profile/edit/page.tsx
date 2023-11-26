@@ -6,10 +6,10 @@ import React from "react";
 
 const EditProfile = async () => {
   const { userId } = auth();
-  if (!userId) redirect("/");
+  if (!userId) redirect("/sign-in");
 
   const user = await getUserById({ userId });
-  if (!user) redirect("/");
+  if (!user) redirect("/sign-in");
 
   return (
     <>

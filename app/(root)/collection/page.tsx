@@ -8,11 +8,16 @@ import { savedQustions } from "@/lib/actions/user.action";
 import { SearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Collection",
+};
 
 export default async function Home({ searchParams }: SearchParamsProps) {
   const { userId: clerkId } = auth();
   const page = searchParams.page ? Number(searchParams.page) : 1;
-  if (!clerkId) redirect("/");
+  if (!clerkId) redirect("/sign-in");
   const result = await savedQustions({
     clerkId,
     searchQuery: searchParams.q,
@@ -22,7 +27,7 @@ export default async function Home({ searchParams }: SearchParamsProps) {
 
   return (
     <>
-      <h1 className="h1-bold text-dark100_light900">Saved questions</h1>
+      <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
         <LocalSearchbar
           route="/"

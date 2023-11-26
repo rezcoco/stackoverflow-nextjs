@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { updateUser } from "@/lib/actions/user.action";
 import { usePathname, useRouter } from "next/navigation";
 import { TUserDoc } from "@/database/user.model";
+import { toast } from "../ui/use-toast";
 
 type Props = {
   user: TUserDoc;
@@ -52,6 +53,9 @@ const Profile: React.FC<Props> = ({ user }) => {
       });
 
       router.back();
+      toast({
+        title: "edit success",
+      });
     } catch (error) {
       console.log(error);
     } finally {
