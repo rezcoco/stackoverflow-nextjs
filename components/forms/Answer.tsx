@@ -93,8 +93,6 @@ const Answer: React.FC<Props> = ({ userId, questionId, question }) => {
           ? aiAnswer.data.replace(/\n/g, "<br />")
           : "";
 
-      console.log(formatedAiAnswer);
-
       if (editorRef.current) {
         const editor = editorRef.current as any;
         editor.setContent(formatedAiAnswer);

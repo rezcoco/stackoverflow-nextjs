@@ -28,8 +28,6 @@ export default async function Home({ searchParams }: SearchParamsProps) {
     result = await getRecommendedQuestions({
       clerkId: userId,
     });
-
-    console.log(result);
   } else {
     result = await getQuestions({
       searchQuery: searchParams.q,
