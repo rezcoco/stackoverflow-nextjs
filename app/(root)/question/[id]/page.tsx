@@ -108,7 +108,7 @@ const QuestionDetail: React.FC<Props> = async ({ params, searchParams }) => {
       </div>
       <AllAnswers
         questionId={result?.id}
-        userId={mongoUser && mongoUser._id}
+        userId={mongoUser && mongoUser.id}
         totalAnswers={result.answers.length}
         page={page}
         filter={searchParams.filter}
