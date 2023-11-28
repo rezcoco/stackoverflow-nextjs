@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import Link from "next/link";
-import { SignedOut } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { sidebarLinks } from "@/constants";
 import { usePathname } from "next/navigation";
@@ -24,7 +24,7 @@ const NavContent = () => {
           (pathname.includes(item.route) && item.route.length > 1) ||
           pathname === item.route;
 
-        return (
+        const NavContent = (
           <SheetClose key={item.label} asChild>
             <Link
               className={cn(
@@ -45,6 +45,12 @@ const NavContent = () => {
               </p>
             </Link>
           </SheetClose>
+        );
+
+        return item.route === "/profile" ? (
+          <SignedIn>{NavContent}</SignedIn>
+        ) : (
+          NavContent
         );
       })}
     </section>
